@@ -32,12 +32,11 @@ class PlaywrightScraper:
         browser: Browser = await browser_type.launch(headless=self.headless)
         html_returns: List[Coroutine[Any, Any, str]] = [
             self.__get_html(browser=browser, url=url) for url in urls]
-
         response = await asyncio.gather(*html_returns)
         await browser.close()
         return response
 
-    async def __get_html(self, browser: Browser, url: str) -> str | None:
+    async def __get_html(self, browser: Browser, url: str) -> Coroutine[str, str, Any]:
         """opens new tab, gets html content"""
         page: Page = await browser.new_page()
         if self.optimise:
