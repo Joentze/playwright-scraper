@@ -37,14 +37,16 @@ class PlaywrightScraper:
         await browser.close()
         return response
 
-    async def __get_html(self, browser: Browser, url: str) -> str:
+    async def __get_html(self, browser: Browser, url: str) -> str | None:
         """opens new tab, gets html content"""
-        print("browser", browser)
         page: Page = await browser.new_page()
         if self.optimise:
             await self.__optimise_page_load(page=page)
-        await page.goto(url=url, wait_until="networkidle", timeout=5000)
-        return await page.inner_html(selector="html", timeout=self.timeout)
+        try:
+            await page.goto(url=url, wait_until="domcontentloaded", timeout=10000)
+            return await page.inner_html(selector="body", timeout=self.timeout)
+        except Exception as e:
+            return None
 
     async def __optimise_page_load(self, page: Page) -> None:
         """blocks memory intensive resources"""
